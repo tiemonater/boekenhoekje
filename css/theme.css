@@ -1,0 +1,91 @@
+/* ==========================================================
+   THEME — all colors, fonts and "feel" settings live here.
+   Change a value below and the whole app follows.
+   ========================================================== */
+
+:root {
+  /* ---- Colors (light) ---- */
+  --c-bg:         #F5EFE6;  /* cream background */
+  --c-card:       #E8DCCB;  /* beige cards */
+  --c-surface:    #FBF7F1;  /* lighter paper, e.g. tab bar and inputs */
+  --c-accent:     #C8AD8D;  /* latte */
+  --c-secondary:  #8B6B4E;  /* mocha */
+  --c-text:       #4A3426;  /* espresso */
+  --c-text-soft:  #7A6253;  /* softer espresso for labels */
+  --c-rose:       #D8A7A0;  /* dusty rose: highlights and buttons */
+  --c-rose-deep:  #C48F87;  /* rose when pressed */
+  --c-on-rose:    #4A3426;  /* text on top of rose */
+  --c-line:       rgba(74, 52, 38, 0.12);
+
+  /* ---- Shadows ---- */
+  --shadow-soft:  0 8px 24px rgba(74, 52, 38, 0.08), 0 1px 3px rgba(74, 52, 38, 0.06);
+  --shadow-lift:  0 14px 34px rgba(74, 52, 38, 0.14), 0 2px 6px rgba(74, 52, 38, 0.08);
+
+  /* ---- Paper texture strength (0 = off) ---- */
+  --paper-opacity: 0.35;
+
+  /* ---- Made-up covers (for books without a photo) ---- */
+  --cover-0: #C8AD8D;  --cover-0-text: #4A3426;
+  --cover-1: #D8A7A0;  --cover-1-text: #4A3426;
+  --cover-2: #8B6B4E;  --cover-2-text: #F5EFE6;
+  --cover-3: #E3CFC0;  --cover-3-text: #4A3426;
+  --cover-4: #A98A75;  --cover-4-text: #F5EFE6;
+
+  /* ---- Shelf plank ---- */
+  --c-plank: #D9C6AE;
+
+  /* ---- Genre ring colors (in this order; checked for colorblind readability) ---- */
+  --genre-0: #D55181;
+  --genre-1: #2A78D6;
+  --genre-2: #EDA100;
+  --genre-3: #6250D6;
+  --genre-4: #1BAF7A;
+  --genre-5: #EB6834;
+  --genre-other: #B5A595;  /* "Overige" and "Zonder genre" */
+
+  /* ---- Fonts ---- */
+  --font-heading: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-body:    "Nunito", -apple-system, system-ui, sans-serif;
+
+  /* ---- Shapes ---- */
+  --radius-xl: 32px;
+  --radius-lg: 24px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+
+  /* ---- Motion ---- */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --speed:     380ms;
+}
+
+/* ---- Warm dark mode: deep browns instead of black ---- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg:         #2A1F18;
+    --c-card:       #3A2C22;
+    --c-surface:    #33261D;
+    --c-accent:     #B8987A;
+    --c-secondary:  #CDAE90;
+    --c-text:       #F2E8DB;
+    --c-text-soft:  #C2AF9C;
+    --c-rose:       #D8A7A0;
+    --c-rose-deep:  #C48F87;
+    --c-on-rose:    #2A1F18;
+    --c-line:       rgba(242, 232, 219, 0.10);
+
+    --shadow-soft:  0 8px 24px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.2);
+    --shadow-lift:  0 14px 34px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.25);
+
+    --paper-opacity: 0.18;
+
+    --c-plank: #4A382B;
+
+    --genre-0: #D55181;
+    --genre-1: #3987E5;
+    --genre-2: #C98500;
+    --genre-3: #9085E9;
+    --genre-4: #199E70;
+    --genre-5: #D95926;
+    --genre-other: #7A6555;
+  }
+}
