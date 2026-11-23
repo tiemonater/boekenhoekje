@@ -3,12 +3,13 @@ import { icon } from "../icons.js";
 import { screenHeader, toast, confirmSheet } from "../ui.js";
 import { getAllBooks } from "../db.js";
 import { setDraft } from "../books.js";
-import { startScanner } from "../scanner.js";
+import { startScanner, scanPhoto } from "../scanner.js";
 import { lookupIsbn, cleanIsbn, isValidIsbn } from "../lookup.js";
 import { downloadCover } from "../image.js";
 
 let stopCamera = null;
 let busy = false;
+let starting = false; // camera is busy starting up
 
 // Called by the router when leaving this screen: switch the camera off.
 export async function leave() {
@@ -33,7 +34,12 @@ export async function render(root) {
         <p>Boek opzoeken…</p>
       </div>
     </div>
-    <p class="scan-hint muted">Richt op de streepjescode achterop het boek (het nummer begint met 978 of 979).</p>
+    <p class="scan-hint muted">Richt op de streepjescode achterop het boek. Lukt het niet? Maak dan een foto.</p>
+
+    <label class="btn btn-primary btn-block photo-scan">
+      ${icon("camera")} Maak een foto van de barcode
+      <input type="file" accept="image/*" capture="environment" class="visually-hidden">
+    </label>
 
     <form class="card isbn-form" novalidate>
       <label class="field">
@@ -47,6 +53,7 @@ export async function render(root) {
   `;
 
   const message = root.querySelector(".scan-message");
+  const busyText = root.querySelector(".scan-busy p");
   const busyBox = root.querySelector(".scan-busy");
 
   async function handleIsbn(raw) {
@@ -75,6 +82,7 @@ export async function render(root) {
 
     message.hidden = true;
     busyBox.hidden = false;
+    busyText.textContent = "Boek opzoeken…";
 
     const found = await lookupIsbn(isbn);
     if (found) {
@@ -91,6 +99,28 @@ export async function render(root) {
 
   root.handleIsbn = handleIsbn; // used by the camera in mounted()
 
+  // ---- Photo of the barcode ----
+  const photoButton = root.querySelector(".photo-scan");
+  const photoInput = photoButton.querySelector("input");
+  // the live camera has to let go before the iPhone camera app can open
+  photoButton.addEventListener("click", () => { leave(); });
+  photoInput.addEventListener("change", async () => {
+    const file = photoInput.files?.[0];
+    photoInput.value = "";
+    if (!file || busy) return;
+    message.hidden = true;
+    busyBox.hidden = false;
+    busyText.textContent = "Barcode lezen…";
+    const isbn = await scanPhoto(file).catch(() => null);
+    if (isbn) return handleIsbn(isbn);
+    busyBox.hidden = true;
+    message.hidden = false;
+    toast("Geen barcode gevonden. Probeer dichterbij en recht van voren.");
+    mounted(root); // live camera back on
+  });
+  // came back from the camera app without a photo: switch the live camera on again
+  photoInput.addEventListener("cancel", () => mounted(root));
+
   root.querySelector(".isbn-form").addEventListener("submit", (e) => {
     e.preventDefault();
     handleIsbn(e.target.elements.isbn.value);
@@ -100,12 +130,15 @@ export async function render(root) {
 
 // Runs once the screen is on the page: now the camera can start.
 export async function mounted(root) {
+  if (stopCamera || starting || !root.isConnected) return; // already running, or screen left
   const message = root.querySelector(".scan-message");
+  message.querySelector("p").textContent = "Camera opstarten…";
   if (!navigator.mediaDevices?.getUserMedia) {
     message.querySelector("p").textContent =
       "De camera werkt alleen als de app online staat (https). Typ het ISBN hieronder.";
     return;
   }
+  starting = true;
   try {
     const stop = await startScanner("reader", (isbn) => root.handleIsbn(isbn));
     if (!root.isConnected) return stop(); // user already left this screen
@@ -117,5 +150,7 @@ export async function mounted(root) {
     message.querySelector("p").textContent = denied
       ? "Geen toegang tot de camera. Sta het toe in Instellingen › Safari › Camera, of typ het ISBN hieronder."
       : "De camera kon niet starten. Typ het ISBN hieronder.";
+  } finally {
+    starting = false;
   }
 }
