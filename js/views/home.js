@@ -6,6 +6,8 @@ import { getAllBooks } from "../db.js";
 import { computeStats, genreStats } from "../books.js";
 import { genreCardHTML, bindGenreCard } from "../genre-chart.js";
 import { showGenreOnShelf } from "./shelf.js";
+import { backupStatus, snoozeReminder, updateBackupDot } from "../backup.js";
+import { formatDate } from "../format.js";
 
 // The total shown last time, so the counter can run from there to the new value.
 // Starts at 0, so opening the app counts up from € 0,00.
@@ -15,6 +17,7 @@ export async function render(root) {
   const books = await getAllBooks();
   const stats = computeStats(books);
   const genres = genreStats(books);
+  const backup = await backupStatus();
   const year = new Date().getFullYear();
   const from = lastShownTotal;
   const to = stats.totalCents;
@@ -35,6 +38,20 @@ export async function render(root) {
       ${grew ? `<div class="hero-delta">+ ${formatEuro(to - from)}</div>` : ""}
       <div class="hero-sub">${stats.count === 1 ? "1 boek" : `${stats.count} boeken`} op de plank</div>
     </section>
+
+    ${backup.due ? `
+      <div class="card backup-nudge section-gap" role="status">
+        <span class="nudge-icon">${icon("backup")}</span>
+        <div>
+          <div class="nudge-title">Tijd voor een backup ✨</div>
+          <p>${backup.lastBackupAt ? `Je laatste backup is van ${formatDate(backup.lastBackupAt)}.` : "Je hebt nog nooit een backup gemaakt."}
+          Je boeken staan alleen op deze telefoon.</p>
+          <div class="nudge-actions">
+            <a class="btn btn-primary btn-small" href="#/backup">Backup maken</a>
+            <button type="button" class="link-btn nudge-later">Later</button>
+          </div>
+        </div>
+      </div>` : ""}
 
     ${stats.count === 0 ? `
       <div class="card home-empty section-gap">
@@ -70,6 +87,11 @@ export async function render(root) {
   `;
 
   bindGenreCard(root, genres, showGenreOnShelf);
+  root.querySelector(".nudge-later")?.addEventListener("click", async (e) => {
+    await snoozeReminder(3); // ask again in 3 days
+    e.target.closest(".backup-nudge").remove();
+    updateBackupDot();
+  });
   countUp(root.querySelector(".hero-value"), from, to);
 }
 

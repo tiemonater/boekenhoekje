@@ -15,11 +15,13 @@ export function toast(message) {
   el.textContent = message;
   requestAnimationFrame(() => el.classList.add("show"));
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove("show"), 2200);
+  // longer messages stay a little longer, so there's time to read them
+  toastTimer = setTimeout(() => el.classList.remove("show"), Math.max(2200, message.length * 70));
 }
 
-// Soft pop-up from the bottom asking "are you sure?". Resolves true/false.
-export function confirmSheet({ title, text, confirmLabel = "Ja", cancelLabel = "Annuleren" }) {
+// Soft pop-up from the bottom asking "are you sure?". Resolves true/false,
+// or "alt" when the optional third button (altLabel) is tapped.
+export function confirmSheet({ title, text, confirmLabel = "Ja", cancelLabel = "Annuleren", altLabel = null }) {
   return new Promise((resolve) => {
     const wrap = document.createElement("div");
     wrap.className = "sheet-backdrop";
@@ -28,6 +30,7 @@ export function confirmSheet({ title, text, confirmLabel = "Ja", cancelLabel = "
         <h2 id="sheet-title">${esc(title)}</h2>
         <p>${esc(text)}</p>
         <button class="btn btn-primary btn-block" data-answer="yes">${esc(confirmLabel)}</button>
+        ${altLabel ? `<button class="btn btn-ghost btn-block" data-answer="alt">${esc(altLabel)}</button>` : ""}
         <button class="btn btn-ghost btn-block" data-answer="no">${esc(cancelLabel)}</button>
       </div>`;
     document.body.append(wrap);
@@ -41,7 +44,7 @@ export function confirmSheet({ title, text, confirmLabel = "Ja", cancelLabel = "
     wrap.addEventListener("click", (e) => {
       if (e.target === wrap) return close(false);
       const btn = e.target.closest("[data-answer]");
-      if (btn) close(btn.dataset.answer === "yes");
+      if (btn) close(btn.dataset.answer === "alt" ? "alt" : btn.dataset.answer === "yes");
     });
   });
 }

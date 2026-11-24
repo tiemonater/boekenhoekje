@@ -8,6 +8,7 @@ import { formatEuro, formatDate } from "../format.js";
 import { coverHTML, releaseCovers } from "../cover.js";
 import * as bookForm from "./form.js";
 import { showGenreOnShelf } from "./shelf.js";
+import { noteChange } from "../backup.js";
 
 // Hide the tab bar while editing.
 export const showTabbar = (params) => params[1] !== "bewerken";
@@ -100,6 +101,7 @@ export async function render(root, params) {
     });
     if (!yes) return;
     await deleteBook(book.id);
+    await noteChange();
     toast("Verwijderd uit je kast");
     location.replace("#/kast");
   });

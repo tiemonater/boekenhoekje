@@ -942,3 +942,46 @@ a.stat:active { transform: scale(0.97); }
   white-space: nowrap;
 }
 .photo-scan { margin: 0 0 18px; min-height: 56px; }
+
+/* ---------- Backup ---------- */
+.text-rose { color: var(--c-rose-deep); font-weight: 700; }
+.option[disabled] { opacity: 0.55; pointer-events: none; }
+label.option { cursor: pointer; }
+.tip p { margin-top: 6px; color: var(--c-text-soft); font-size: 0.9rem; }
+.tip .field-label { display: flex; align-items: center; gap: 6px; }
+.tip .field-label .icon { color: var(--c-rose); }
+
+.backup-nudge {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  border: 1.5px solid var(--c-rose);
+  animation: view-in 500ms var(--ease-soft) both;
+}
+.nudge-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: var(--c-rose);
+  color: var(--c-on-rose);
+}
+.nudge-title { font-family: var(--font-heading); font-weight: 600; font-size: 1.1rem; }
+.backup-nudge p { margin-top: 4px; font-size: 0.9rem; color: var(--c-text-soft); }
+.nudge-actions { display: flex; align-items: center; gap: 16px; margin-top: 12px; }
+
+/* rose dot on the Backup tab when a backup is due */
+.tab { position: relative; }
+.tab.has-dot::after {
+  content: "";
+  position: absolute;
+  top: 9px;
+  right: 22px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--c-rose-deep);
+  box-shadow: 0 0 0 2px var(--c-surface);
+}

@@ -5,6 +5,7 @@ import { getAllBooks, saveBook } from "../db.js";
 import { FORMATS, CONDITIONS, STATUSES, makeBook, parsePrice, priceToInput, markJustAdded, allGenres, cleanGenres, takeDraft } from "../books.js";
 import { coverHTML } from "../cover.js";
 import { shrinkImage } from "../image.js";
+import { noteChange } from "../backup.js";
 
 // Today's date as "2026-11-24", in the phone's own time zone.
 function today() {
@@ -251,6 +252,7 @@ export async function renderForm(root, { book }) {
       const genres = new FormData(form).getAll("genres");
       saved = makeBook({ ...data, genres, cover, priceCents: parsePrice(data.price) }, book);
       await saveBook(saved);
+      await noteChange();
     } catch (err) {
       console.error(err);
       toast(`Opslaan lukte niet: ${err.message || err}`);

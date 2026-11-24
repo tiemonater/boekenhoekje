@@ -3,6 +3,7 @@
 import { icon } from "./icons.js";
 import { requestPersistentStorage } from "./db.js";
 import { toast } from "./ui.js";
+import { updateBackupDot } from "./backup.js";
 import * as home from "./views/home.js";
 import * as shelf from "./views/shelf.js";
 import * as add from "./views/add.js";
@@ -73,6 +74,7 @@ async function show() {
   window.scrollTo(0, 0);
   // Some screens need to be on the page before they can start (e.g. the camera)
   route.view.mounted?.(container, params);
+  updateBackupDot();
 
   const tabbar = typeof route.tabbar === "function" ? route.tabbar(params) : route.tabbar !== false;
   document.body.classList.toggle("no-tabbar", !tabbar);
