@@ -34,6 +34,7 @@ export async function render(root, params) {
   const rows = [
     ["coin", "Prijs", book.priceCents != null ? formatEuro(book.priceCents) : null],
     ["calendar", "Gekocht op", formatDate(book.purchaseDate)],
+    ["check", "Uitgelezen op", formatDate(book.finishedAt)],
     ["shop", "Waar gekocht", book.store],
     ["book", "Soort", FORMATS[book.format]],
     ["sparkle", "Staat", CONDITIONS[book.condition]],

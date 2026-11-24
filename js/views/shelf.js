@@ -30,6 +30,11 @@ export function showGenreOnShelf(genre) {
   Object.assign(state, { query: "", status: "alle", format: "alle", genre });
 }
 
+// Used by the reading goal card: open the shelf showing the books you've read.
+export function showReadOnShelf() {
+  Object.assign(state, { query: "", status: "gelezen", format: "alle", genre: "alle" });
+}
+
 function loadSaved() {
   try {
     const { sort, status, format } = JSON.parse(localStorage.getItem(SAVED_KEY)) ?? {};

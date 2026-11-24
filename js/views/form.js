@@ -118,6 +118,10 @@ export async function renderForm(root, { book }) {
           <span class="field-label">Leesstatus</span>
           ${choices("status", STATUSES, book.status ?? "wil-lezen")}
         </div>
+        <label class="field finished-field" ${book.status === "gelezen" ? "" : "hidden"}>
+          <span class="field-label">Uitgelezen op <span class="field-hint">telt mee voor je leesdoel</span></span>
+          <input name="finishedAt" type="date" value="${book.finishedAt ?? ""}">
+        </label>
       </div>
 
       <div class="card field-group">
@@ -228,6 +232,17 @@ export async function renderForm(root, { book }) {
   newInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") { e.preventDefault(); addOwnGenre(); } // don't submit the whole form
   });
+
+  // "Gelezen" shows the "Uitgelezen op" date, filled in with today if it's empty
+  const finishedField = root.querySelector(".finished-field");
+  const finishedInput = finishedField.querySelector("input");
+  root.querySelectorAll('input[name="status"]').forEach((radio) =>
+    radio.addEventListener("change", () => {
+      const read = radio.value === "gelezen" && radio.checked;
+      finishedField.hidden = !read;
+      if (read && !finishedInput.value) finishedInput.value = today();
+    })
+  );
 
   const form = root.querySelector("form");
   form.addEventListener("submit", async (event) => {

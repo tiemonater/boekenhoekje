@@ -70,6 +70,8 @@ export function makeBook(data, existing = {}) {
     format: data.format in FORMATS ? data.format : "paperback",
     condition: data.condition in CONDITIONS ? data.condition : "nieuw",
     status: data.status in STATUSES ? data.status : "wil-lezen",
+    // the day the book was finished ("2026-11-24"); only for books marked as read
+    finishedAt: data.status === "gelezen" && /^\d{4}-\d{2}-\d{2}$/.test(data.finishedAt ?? "") ? data.finishedAt : null,
     genres: cleanGenres(data.genres ?? existing.genres ?? []),
     pages: toWholeNumber(data.pages),
     year: toWholeNumber(data.year),

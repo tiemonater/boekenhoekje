@@ -19,6 +19,7 @@ Gemaakt voor de iPhone: zet hem op je beginscherm en gebruik hem als een gewone 
 - Eigen coverfoto's, genres (vaste lijst + eigen), leesstatus, prijs, winkel, notities
 - Home: totale waarde, aantal, gemiddelde prijs, duurste boek, uitgegeven dit jaar, genres (balkjes of ring)
 - Kast: zoeken, sorteren en filteren
+- Leesdoel per jaar: ring met voortgang en of je op schema ligt
 - Backup naar een JSON-bestand en terugzetten, met herinnering
 - Lichte en donkere modus (volgt je iPhone), werkt offline
 
@@ -49,6 +50,8 @@ js/
   image.js             foto's verkleinen, covers downloaden
   cover.js             cover tekenen (foto of zelfgemaakte cover)
   genre-chart.js       genre-kaart op Home (balkjes / ring)
+  goals.js             leesdoel: opslaan en voortgang/schema berekenen
+  goal-card.js         leesdoel-kaart op Home en het instel-venster
   format.js            € 12,50 en Nederlandse datums
   ui.js, icons.js      meldingen, pop-ups, lijn-icoontjes
   views/               één bestand per scherm (home, shelf, book, form, scan, add, backup)
@@ -69,6 +72,7 @@ tools/                 hulpscripts (niet nodig voor de app zelf)
 | `format` | `hardcover` / `paperback` / `anders` | |
 | `condition` | `nieuw` / `tweedehands` | |
 | `status` | `wil-lezen` / `aan-het-lezen` / `gelezen` | |
+| `finishedAt` | `"2026-11-24"` | uitgelezen op; alleen bij `gelezen`, telt voor het leesdoel |
 | `genres` | `["Fantasy", "Romance"]` | één of meer |
 | `pages`, `year`, `notes` | `480`, `2015`, `"…"` | |
 | `createdAt`, `updatedAt` | ISO-datum | automatisch |
@@ -78,7 +82,6 @@ en het detailscherm (`js/views/book.js`). Oude boeken zonder het veld blijven ge
 
 ### Ideeën voor later
 - **Verlanglijst:** een veld `owned: false` (of een aparte opslag) en een filter in de kast.
-- **Leesdoelen:** een instelling in de `settings`-opslag + een kaartje op Home.
 - **CSV-export:** naast `createBackupFile()` in `js/backup.js`.
 - **Sync tussen apparaten:** vraagt een server of cloud-opslag; de backup-functies zijn een goed startpunt.
 

@@ -5,7 +5,8 @@ import { screenHeader, esc } from "../ui.js";
 import { getAllBooks } from "../db.js";
 import { computeStats, genreStats } from "../books.js";
 import { genreCardHTML, bindGenreCard } from "../genre-chart.js";
-import { showGenreOnShelf } from "./shelf.js";
+import { showGenreOnShelf, showReadOnShelf } from "./shelf.js";
+import { goalCardHTML, bindGoalCard } from "../goal-card.js";
 import { backupStatus, snoozeReminder, updateBackupDot } from "../backup.js";
 import { formatDate } from "../format.js";
 
@@ -19,6 +20,7 @@ export async function render(root) {
   const genres = genreStats(books);
   const backup = await backupStatus();
   const year = new Date().getFullYear();
+  const goalCard = stats.count > 0 ? await goalCardHTML(books, year) : "";
   const from = lastShownTotal;
   const to = stats.totalCents;
   const grew = to > from && from > 0;
@@ -83,10 +85,13 @@ export async function render(root) {
       </div>
     </section>
 
+    ${goalCard}
+
     ${stats.count > 0 ? genreCardHTML(genres) : ""}
   `;
 
   bindGenreCard(root, genres, showGenreOnShelf);
+  bindGoalCard(root, year, { onChanged: () => render(root), onShowRead: showReadOnShelf });
   root.querySelector(".nudge-later")?.addEventListener("click", async (e) => {
     await snoozeReminder(3); // ask again in 3 days
     e.target.closest(".backup-nudge").remove();
