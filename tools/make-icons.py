@@ -37,30 +37,35 @@ def sparkle(d, cx, cy, r, fill):
     d.polygon(pts, fill=fill)
 
 
-img = Image.new("RGB", (N, N), CREAM)
-d = ImageDraw.Draw(img)
+def draw_art(background=CREAM):
+    """The stack of books with sparkles, on a square of the given colour (4096 px)."""
+    img = Image.new("RGB", (N, N), background)
+    d = ImageDraw.Draw(img)
 
-book(d, 252, 650, 772, 760, BEIGE)   # bottom
-book(d, 300, 540, 724, 650, ROSE)    # middle
-book(d, 276, 430, 700, 540, LATTE)   # top
+    book(d, 252, 650, 772, 760, BEIGE)   # bottom
+    book(d, 300, 540, 724, 650, ROSE)    # middle
+    book(d, 276, 430, 700, 540, LATTE)   # top
 
-# little bookmark ribbon hanging from the top book
-d.polygon([(p(600), p(540)), (p(640), p(540)), (p(640), p(612)), (p(620), p(596)), (p(600), p(612))], fill=MOCHA)
+    # little bookmark ribbon hanging from the top book
+    d.polygon([(p(600), p(540)), (p(640), p(540)), (p(640), p(612)), (p(620), p(596)), (p(600), p(612))], fill=MOCHA)
 
-sparkle(d, 760, 330, 82, ROSE)
-sparkle(d, 300, 330, 40, LATTE)
-sparkle(d, 838, 470, 28, LATTE)
+    sparkle(d, 760, 330, 82, ROSE)
+    sparkle(d, 300, 330, 40, LATTE)
+    sparkle(d, 838, 470, 28, LATTE)
 
-# zoom in a little so the books fill the icon nicely
-img = img.crop((p(102), p(140), p(922), p(960)))
+    # zoom in a little so the books fill the icon nicely
+    return img.crop((p(102), p(140), p(922), p(960)))
 
-out = Path(__file__).resolve().parent.parent / "icons"
-out.mkdir(exist_ok=True)
-for name, size in [
-    ("icon-512.png", 512),
-    ("icon-maskable-512.png", 512),
-    ("icon-192.png", 192),
-    ("apple-touch-icon.png", 180),
-]:
-    img.resize((size, size), Image.LANCZOS).save(out / name, optimize=True)
-print("Icons saved in", out)
+
+if __name__ == "__main__":
+    img = draw_art()
+    out = Path(__file__).resolve().parent.parent / "icons"
+    out.mkdir(exist_ok=True)
+    for name, size in [
+        ("icon-512.png", 512),
+        ("icon-maskable-512.png", 512),
+        ("icon-192.png", 192),
+        ("apple-touch-icon.png", 180),
+    ]:
+        img.resize((size, size), Image.LANCZOS).save(out / name, optimize=True)
+    print("Icons saved in", out)

@@ -90,5 +90,11 @@ window.addEventListener("unhandledrejection", (e) => toast(`Foutje: ${e.reason?.
 
 buildTabbar();
 requestPersistentStorage();
+
+// Keep a copy of the app on the phone so it also opens without internet (see sw.js).
+// Only possible on https (or localhost), so not on the Wi-Fi test address.
+if ("serviceWorker" in navigator && isSecureContext) {
+  navigator.serviceWorker.register("sw.js").catch((err) => console.warn("Offline copy not available", err));
+}
 window.addEventListener("hashchange", show);
 show();
