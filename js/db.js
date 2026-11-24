@@ -38,10 +38,30 @@ async function run(storeName, mode, action) {
   });
 }
 
+// ---- Covers ----
+// Safari (iPhone) has a bug: an image Blob read from IndexedDB and saved again
+// can come back empty. So covers are stored as raw bytes + type, and turned
+// back into a Blob when read. Covers saved the old way (as Blob) still load fine.
+async function toStored(book) {
+  if (!(book.cover instanceof Blob)) return book;
+  return { ...book, cover: { imageType: book.cover.type || "image/jpeg", imageData: await book.cover.arrayBuffer() } };
+}
+function fromStored(row) {
+  // (careful: a Blob itself also has a "bytes" method, so check our own field names)
+  const c = row?.cover;
+  if (c && !(c instanceof Blob) && c.imageData instanceof ArrayBuffer) {
+    return { ...row, cover: new Blob([c.imageData], { type: c.imageType }) };
+  }
+  return row;
+}
+
 // ---- Books ----
-export const getAllBooks = () => run("books", "readonly", (s) => s.getAll());
-export const getBook = (id) => run("books", "readonly", (s) => s.get(id));
-export const saveBook = (book) => run("books", "readwrite", (s) => s.put(book));
+export const getAllBooks = async () => (await run("books", "readonly", (s) => s.getAll())).map(fromStored);
+export const getBook = async (id) => fromStored(await run("books", "readonly", (s) => s.get(id)));
+export async function saveBook(book) {
+  const row = await toStored(book); // before the transaction: it must not wait halfway
+  return run("books", "readwrite", (s) => s.put(row));
+}
 export const deleteBook = (id) => run("books", "readwrite", (s) => s.delete(id));
 
 // ---- Settings ----

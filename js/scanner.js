@@ -42,11 +42,11 @@ export async function startScanner(elementId, onIsbn) {
   await scanner.start(
     { facingMode: "environment" },
     {
-      fps: 10,
-      // a wide box: barcodes are wide
-      qrbox: (w, h) => ({ width: Math.floor(w * 0.9), height: Math.floor(Math.min(h * 0.5, w * 0.45)) }),
-      aspectRatio: 1.1,
-      // ask for a sharp picture; the default can be quite blurry on iPhone
+      fps: 8,
+      // No scan box from the library: it reads the whole picture, and the app
+      // draws its own frame in the middle (the library's box ended up off-centre
+      // on iPhone once the picture was cropped to fit the screen).
+      // Ask for a sharp picture; the default can be quite blurry on iPhone.
       videoConstraints: {
         facingMode: "environment",
         width: { ideal: 1920 },

@@ -25,6 +25,7 @@ export async function render(root) {
 
     <div class="scan-box">
       <div id="reader"></div>
+      <div class="scan-frame" aria-hidden="true"><span></span></div>
       <div class="scan-message">
         ${icon("barcode", "icon-lg")}
         <p>Camera opstarten…</p>

@@ -842,11 +842,49 @@ a.stat:active { transform: scale(0.97); }
   background: var(--c-text);
   box-shadow: var(--shadow-lift);
 }
-#reader { position: absolute; inset: 0; border: 0 !important; }
-#reader video { width: 100% !important; height: 100% !important; object-fit: cover; }
-/* the library's own scan frame: make it soft and rounded */
-#reader #qr-shaded-region { border-color: rgba(42, 31, 24, 0.45) !important; }
-#reader #qr-shaded-region > div { background: var(--c-rose) !important; }
+/* camera picture fills the box, centred (edges are cropped off) */
+#reader { position: absolute !important; inset: 0; width: auto !important; border: 0 !important; overflow: hidden; }
+#reader video {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+#reader canvas, #reader #qr-shaded-region { display: none !important; }
+
+/* our own aiming frame, always in the middle; the area around it is dimmed */
+.scan-frame {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 82%;
+  aspect-ratio: 2 / 1;
+  transform: translate(-50%, -50%);
+  border-radius: 18px;
+  box-shadow: 0 0 0 999px rgba(42, 31, 24, 0.35);
+  pointer-events: none;
+}
+.scan-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 3px solid var(--c-rose);
+}
+/* a soft line gliding over the barcode */
+.scan-frame span {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 50%;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--c-rose);
+  box-shadow: 0 0 10px var(--c-rose);
+  animation: scan-line 1.8s ease-in-out infinite alternate;
+}
+@keyframes scan-line { from { transform: translateY(-34px); } to { transform: translateY(34px); } }
 
 .scan-message, .scan-busy {
   position: absolute;
