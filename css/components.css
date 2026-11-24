@@ -307,7 +307,8 @@ body.no-tabbar .app-main { padding-bottom: calc(env(safe-area-inset-bottom) + 32
 .field-label { font-size: 0.85rem; font-weight: 700; color: var(--c-secondary); }
 .req { color: var(--c-rose-deep); }
 
-.field input,
+/* text fields only: the hidden radio/checkbox inside the pills must stay tiny */
+.field input:where(:not([type="radio"]):not([type="checkbox"])),
 .field textarea {
   -webkit-appearance: none;
   appearance: none;
@@ -350,7 +351,18 @@ body.no-tabbar .app-main { padding-bottom: calc(env(safe-area-inset-bottom) + 32
 
 /* Pill choices */
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip input { position: absolute; opacity: 0; pointer-events: none; }
+.chip { position: relative; }
+/* the real radio/checkbox is invisible and tiny, the pill is what you see and tap */
+.chip input, .list-switch input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
 .chip span {
   display: inline-flex;
   align-items: center;
@@ -1102,7 +1114,6 @@ label.option { cursor: pointer; }
   box-shadow: var(--shadow-soft);
 }
 .list-switch label, .shelf-switch button { position: relative; cursor: pointer; }
-.list-switch input { position: absolute; opacity: 0; pointer-events: none; }
 .list-switch span, .shelf-switch button {
   display: flex;
   align-items: center;
@@ -1176,3 +1187,9 @@ label.option { cursor: pointer; }
   text-decoration: none;
 }
 .hero-wish .icon { color: var(--c-rose-deep); }
+
+/* very narrow screens: let the switch labels shrink or wrap instead of pushing the page wider */
+.list-switch, .shelf-switch { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+@media (max-width: 360px) {
+  .list-switch span, .shelf-switch button { white-space: normal; font-size: 0.8rem; line-height: 1.15; text-align: center; padding: 4px 8px; }
+}
