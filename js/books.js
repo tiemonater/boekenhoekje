@@ -53,10 +53,16 @@ export function allGenres(books) {
   return [...GENRES, ...own];
 }
 
+// A book is in your collection unless it's on the wishlist (owned: false).
+// Books saved before the wishlist existed have no "owned" field: they're owned.
+export const isOwned = (book) => book.owned !== false;
+
 // Builds a complete, tidy book object from form data.
 // `existing` is passed when editing, so id and createdAt stay the same.
 export function makeBook(data, existing = {}) {
   const now = new Date().toISOString();
+  const owned = data.owned ?? existing.owned ?? true;
+  const status = owned && data.status in STATUSES ? data.status : "wil-lezen";
   return {
     id: existing.id ?? newId(),
     isbn: clean(data.isbn),
@@ -64,14 +70,15 @@ export function makeBook(data, existing = {}) {
     author: clean(data.author),
     // image Blob (own photo / downloaded copy), a web link to a cover, or null
     cover: "cover" in data ? data.cover ?? null : existing.cover ?? null,
-    priceCents: data.priceCents ?? null,
-    purchaseDate: data.purchaseDate || null,     // "2026-11-24"
-    store: clean(data.store),
+    owned: owned !== false,                       // false = on the wishlist
+    priceCents: data.priceCents ?? null,          // wishlist: roughly what it costs
+    purchaseDate: owned ? data.purchaseDate || null : null, // "2026-11-24"
+    store: clean(data.store),                     // wishlist: where to buy it
     format: data.format in FORMATS ? data.format : "paperback",
     condition: data.condition in CONDITIONS ? data.condition : "nieuw",
-    status: data.status in STATUSES ? data.status : "wil-lezen",
+    status,
     // the day the book was finished ("2026-11-24"); only for books marked as read
-    finishedAt: data.status === "gelezen" && /^\d{4}-\d{2}-\d{2}$/.test(data.finishedAt ?? "") ? data.finishedAt : null,
+    finishedAt: status === "gelezen" && /^\d{4}-\d{2}-\d{2}$/.test(data.finishedAt ?? "") ? data.finishedAt : null,
     genres: cleanGenres(data.genres ?? existing.genres ?? []),
     pages: toWholeNumber(data.pages),
     year: toWholeNumber(data.year),
@@ -236,6 +243,15 @@ export function takeDraft() {
   const d = draft;
   draft = null;
   return d;
+}
+
+// "Add to wishlist" from the wishlist screen: the next new-book form starts on the wishlist.
+let wishPreference = false;
+export const preferWishlist = (on = true) => { wishPreference = on; };
+export function takeWishPreference() {
+  const v = wishPreference;
+  wishPreference = false;
+  return v;
 }
 
 // Remembers the book that was just added, so the shelf can animate it.

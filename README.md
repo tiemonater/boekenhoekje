@@ -20,6 +20,7 @@ Gemaakt voor de iPhone: zet hem op je beginscherm en gebruik hem als een gewone 
 - Home: totale waarde, aantal, gemiddelde prijs, duurste boek, uitgegeven dit jaar, genres (balkjes of ring)
 - Kast: zoeken, sorteren en filteren
 - Leesdoel per jaar: ring met voortgang en of je op schema ligt
+- Verlanglijst: boeken die je nog wilt kopen, met "Gekocht!" om ze naar je kast te verhuizen
 - Backup naar een JSON-bestand en terugzetten, met herinnering
 - Lichte en donkere modus (volgt je iPhone), werkt offline
 
@@ -66,6 +67,7 @@ tools/                 hulpscripts (niet nodig voor de app zelf)
 | `id` | `"9b68…"` | uniek, automatisch |
 | `isbn` | `"9789082410617"` | |
 | `title`, `author` | `"Het smelt"`, `"Lize Spit"` | titel is verplicht |
+| `owned` | `true` / `false` | `false` = op de verlanglijst (telt niet mee in waarde en statistieken) |
 | `cover` | Blob, `"https://…"` of `null` | in de opslag als `{ imageType, imageData }` (Safari-fix) |
 | `priceCents` | `2250` | prijs in centen (€ 22,50), `null` = onbekend |
 | `purchaseDate`, `store` | `"2026-11-24"`, `"De Slegte"` | |
@@ -81,7 +83,6 @@ Nieuwe velden toevoegen: in `makeBook()` in `js/books.js`, het formulier (`js/vi
 en het detailscherm (`js/views/book.js`). Oude boeken zonder het veld blijven gewoon werken.
 
 ### Ideeën voor later
-- **Verlanglijst:** een veld `owned: false` (of een aparte opslag) en een filter in de kast.
 - **CSV-export:** naast `createBackupFile()` in `js/backup.js`.
 - **Sync tussen apparaten:** vraagt een server of cloud-opslag; de backup-functies zijn een goed startpunt.
 

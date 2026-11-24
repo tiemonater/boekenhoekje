@@ -2,10 +2,11 @@
 import { icon } from "../icons.js";
 import { screenHeader, toast, esc } from "../ui.js";
 import { getAllBooks, saveBook } from "../db.js";
-import { FORMATS, CONDITIONS, STATUSES, makeBook, parsePrice, priceToInput, markJustAdded, allGenres, cleanGenres, takeDraft } from "../books.js";
+import { FORMATS, CONDITIONS, STATUSES, makeBook, parsePrice, priceToInput, markJustAdded, allGenres, cleanGenres, takeDraft, takeWishPreference } from "../books.js";
 import { coverHTML } from "../cover.js";
 import { shrinkImage } from "../image.js";
 import { noteChange } from "../backup.js";
+import { showListOnShelf } from "./shelf.js";
 
 // Today's date as "2026-11-24", in the phone's own time zone.
 function today() {
@@ -56,17 +57,29 @@ export async function renderForm(root, { book }) {
       : screenHeader({ eyebrow: "Nieuw op de plank", title: "Zelf invullen", eyebrowIcon: "pen", back: "#/toevoegen" });
 
   let cover = book.cover ?? null; // Blob, web link or null — changed by the photo buttons
+  const startOnWishlist = book.owned === false || (!isEdit && takeWishPreference());
 
   root.innerHTML = `
     ${header}
 
-    <form class="book-form" novalidate autocomplete="off">
+    <form class="book-form ${startOnWishlist ? "is-wish" : ""}" novalidate autocomplete="off">
+      <div class="list-switch" role="radiogroup" aria-label="Waar komt dit boek?">
+        <label>
+          <input type="radio" name="list" value="kast" ${startOnWishlist ? "" : "checked"}>
+          <span>${icon("shelf", "icon-sm")} In mijn kast</span>
+        </label>
+        <label>
+          <input type="radio" name="list" value="verlanglijst" ${startOnWishlist ? "checked" : ""}>
+          <span>${icon("heart", "icon-sm")} Op mijn verlanglijst</span>
+        </label>
+      </div>
+
       <div class="card cover-picker">
         <div class="cover-preview"></div>
         <div class="cover-actions">
           <span class="field-label">Cover</span>
           <label class="btn btn-ghost btn-small">
-            ${icon("camera", "icon-sm")} Foto maken of kiezen
+            ${icon("camera", "icon-sm")} Eigen foto
             <input type="file" accept="image/*" class="cover-file visually-hidden">
           </label>
           <button type="button" class="link-btn cover-remove">Cover weghalen</button>
@@ -87,19 +100,19 @@ export async function renderForm(root, { book }) {
       <div class="card field-group">
         <div class="field-row">
           <label class="field">
-            <span class="field-label">Prijs</span>
+            <span class="field-label"><span class="when-owned">Prijs</span><span class="when-wish">Prijs (ongeveer)</span></span>
             <span class="input-prefix">
               <span aria-hidden="true">€</span>
               <input name="price" type="text" inputmode="decimal" value="${priceToInput(book.priceCents)}" placeholder="0,00">
             </span>
           </label>
-          <label class="field">
+          <label class="field only-owned">
             <span class="field-label">Gekocht op</span>
             <input name="purchaseDate" type="date" value="${isEdit ? book.purchaseDate ?? "" : today()}">
           </label>
         </div>
         <label class="field">
-          <span class="field-label">Waar gekocht</span>
+          <span class="field-label"><span class="when-owned">Waar gekocht</span><span class="when-wish">Waar te koop</span></span>
           <input name="store" type="text" list="store-list" value="${esc(book.store)}" placeholder="Bijv. Boekhandel, De Slegte, Vinted">
           <datalist id="store-list">${stores.map((s) => `<option value="${esc(s)}">`).join("")}</datalist>
         </label>
@@ -110,15 +123,15 @@ export async function renderForm(root, { book }) {
           <span class="field-label">Soort</span>
           ${choices("format", FORMATS, book.format ?? "paperback")}
         </div>
-        <div class="field">
+        <div class="field only-owned">
           <span class="field-label">Staat</span>
           ${choices("condition", CONDITIONS, book.condition ?? "nieuw")}
         </div>
-        <div class="field">
+        <div class="field only-owned">
           <span class="field-label">Leesstatus</span>
           ${choices("status", STATUSES, book.status ?? "wil-lezen")}
         </div>
-        <label class="field finished-field" ${book.status === "gelezen" ? "" : "hidden"}>
+        <label class="field finished-field only-owned" ${book.status === "gelezen" ? "" : "hidden"}>
           <span class="field-label">Uitgelezen op <span class="field-hint">telt mee voor je leesdoel</span></span>
           <input name="finishedAt" type="date" value="${book.finishedAt ?? ""}">
         </label>
@@ -163,7 +176,7 @@ export async function renderForm(root, { book }) {
       </div>
 
       <button class="btn btn-primary btn-block btn-save" type="submit">
-        ${icon("check")} ${isEdit ? "Wijzigingen opslaan" : "In mijn kast zetten"}
+        ${icon("check")} ${isEdit ? "Wijzigingen opslaan" : `<span class="when-owned">In mijn kast zetten</span><span class="when-wish">Op mijn verlanglijst zetten</span>`}
       </button>
     </form>
   `;
@@ -244,6 +257,13 @@ export async function renderForm(root, { book }) {
     })
   );
 
+  // Kast / verlanglijst switch: shows only the fields that fit
+  root.querySelectorAll('input[name="list"]').forEach((radio) =>
+    radio.addEventListener("change", () =>
+      root.querySelector("form").classList.toggle("is-wish", radio.value === "verlanglijst" && radio.checked)
+    )
+  );
+
   const form = root.querySelector("form");
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -265,7 +285,8 @@ export async function renderForm(root, { book }) {
     let saved;
     try {
       const genres = new FormData(form).getAll("genres");
-      saved = makeBook({ ...data, genres, cover, priceCents: parsePrice(data.price) }, book);
+      const owned = data.list !== "verlanglijst";
+      saved = makeBook({ ...data, owned, genres, cover, priceCents: parsePrice(data.price) }, book);
       await saveBook(saved);
       await noteChange();
     } catch (err) {
@@ -280,7 +301,8 @@ export async function renderForm(root, { book }) {
       location.replace(`#/boek/${encodeURIComponent(saved.id)}`);
     } else {
       markJustAdded(saved.id);
-      toast("In je kast gezet ✨");
+      showListOnShelf(saved.owned ? "kast" : "verlanglijst");
+      toast(saved.owned ? "In je kast gezet ✨" : "Op je verlanglijst gezet ♡");
       location.replace("#/kast");
     }
   });

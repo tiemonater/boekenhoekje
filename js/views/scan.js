@@ -2,7 +2,7 @@
 import { icon } from "../icons.js";
 import { screenHeader, toast, confirmSheet } from "../ui.js";
 import { getAllBooks } from "../db.js";
-import { setDraft } from "../books.js";
+import { setDraft, isOwned } from "../books.js";
 import { startScanner, scanPhoto } from "../scanner.js";
 import { lookupIsbn, cleanIsbn, isValidIsbn } from "../lookup.js";
 import { downloadCover } from "../image.js";
@@ -67,7 +67,20 @@ export async function render(root) {
     busy = true;
     await leave(); // camera off while we look things up
 
-    const existing = (await getAllBooks()).find((b) => cleanIsbn(b.isbn) === isbn);
+    const matches = (await getAllBooks()).filter((b) => cleanIsbn(b.isbn) === isbn);
+    // On your wishlist? Then you're probably holding it in the shop: "Gekocht?"
+    const wished = matches.find((b) => !isOwned(b));
+    if (wished) {
+      const choice = await confirmSheet({
+        title: "Staat op je verlanglijst ♡",
+        text: `"${wished.title}" staat op je verlanglijst. Heb je hem gekocht?`,
+        confirmLabel: "Ja, gekocht!",
+        cancelLabel: "Nee, bekijk het boek",
+      });
+      location.replace(`#/boek/${encodeURIComponent(wished.id)}${choice ? "/gekocht" : ""}`);
+      return;
+    }
+    const existing = matches.find(isOwned);
     if (existing) {
       const again = await confirmSheet({
         title: "Staat al in je kast",

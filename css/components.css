@@ -1090,3 +1090,89 @@ label.option { cursor: pointer; }
 .stepper input::-webkit-inner-spin-button, .stepper input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .stepper input:focus { outline: none; }
 .stepper-hint { margin-bottom: 8px; font-size: 0.88rem; }
+
+/* ---------- Wishlist: form switch ---------- */
+.list-switch, .shelf-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--c-card);
+  box-shadow: var(--shadow-soft);
+}
+.list-switch label, .shelf-switch button { position: relative; cursor: pointer; }
+.list-switch input { position: absolute; opacity: 0; pointer-events: none; }
+.list-switch span, .shelf-switch button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: var(--c-text-soft);
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  transition: background-color 200ms, color 200ms;
+}
+.list-switch input:checked + span,
+.shelf-switch button[aria-selected="true"] { background: var(--c-rose); color: var(--c-on-rose); }
+.list-switch input:focus-visible + span { outline: 2px solid var(--c-secondary); outline-offset: 2px; }
+.shelf-switch button { appearance: none; border: 0; background: none; font-family: inherit; }
+
+.book-form.is-wish .only-owned,
+.book-form.is-wish .when-owned,
+.book-form:not(.is-wish) .when-wish { display: none !important; }
+
+/* ---------- Wishlist: shelf ---------- */
+.shelf-switch { margin: -6px 0 16px; }
+.shelf-switch .count {
+  min-width: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  font-size: 0.75rem;
+  line-height: 20px;
+  text-align: center;
+}
+.shelf-tools[hidden] { display: none; }
+.add-wish { display: inline-flex; align-items: center; gap: 4px; justify-self: start; }
+.add-wish[hidden] { display: none; }
+
+.shelf-book { position: relative; }
+.wish-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--c-surface);
+  color: var(--c-rose-deep);
+  box-shadow: var(--shadow-soft);
+}
+.wish-badge .icon { width: 14px; height: 14px; fill: currentColor; }
+.bought-sheet { text-align: left; }
+.bought-sheet h2, .bought-sheet > p { text-align: center; }
+.bought-sheet h2 .icon { color: var(--c-rose); vertical-align: -1px; }
+.btn-bought { min-height: 56px; font-size: 1.05rem; }
+.hero-wish {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 12px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c-rose) 22%, transparent);
+  color: var(--c-secondary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.hero-wish .icon { color: var(--c-rose-deep); }

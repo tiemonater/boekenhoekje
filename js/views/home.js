@@ -3,9 +3,9 @@ import { icon } from "../icons.js";
 import { formatEuro } from "../format.js";
 import { screenHeader, esc } from "../ui.js";
 import { getAllBooks } from "../db.js";
-import { computeStats, genreStats } from "../books.js";
+import { computeStats, genreStats, isOwned } from "../books.js";
 import { genreCardHTML, bindGenreCard } from "../genre-chart.js";
-import { showGenreOnShelf, showReadOnShelf } from "./shelf.js";
+import { showGenreOnShelf, showReadOnShelf, showListOnShelf } from "./shelf.js";
 import { goalCardHTML, bindGoalCard } from "../goal-card.js";
 import { backupStatus, snoozeReminder, updateBackupDot } from "../backup.js";
 import { formatDate } from "../format.js";
@@ -15,7 +15,10 @@ import { formatDate } from "../format.js";
 let lastShownTotal = 0;
 
 export async function render(root) {
-  const books = await getAllBooks();
+  // Only books you own count; the wishlist gets its own little line.
+  const everything = await getAllBooks();
+  const books = everything.filter(isOwned);
+  const wishCount = everything.length - books.length;
   const stats = computeStats(books);
   const genres = genreStats(books);
   const backup = await backupStatus();
@@ -39,6 +42,7 @@ export async function render(root) {
       <div class="hero-value" aria-live="polite">${formatEuro(from)}</div>
       ${grew ? `<div class="hero-delta">+ ${formatEuro(to - from)}</div>` : ""}
       <div class="hero-sub">${stats.count === 1 ? "1 boek" : `${stats.count} boeken`} op de plank</div>
+      ${wishCount ? `<a class="hero-wish" href="#/kast">${icon("heart", "icon-sm")} ${wishCount} op je verlanglijst</a>` : ""}
     </section>
 
     ${backup.due ? `
@@ -91,6 +95,7 @@ export async function render(root) {
   `;
 
   bindGenreCard(root, genres, showGenreOnShelf);
+  root.querySelector(".hero-wish")?.addEventListener("click", () => showListOnShelf("verlanglijst"));
   bindGoalCard(root, year, { onChanged: () => render(root), onShowRead: showReadOnShelf });
   root.querySelector(".nudge-later")?.addEventListener("click", async (e) => {
     await snoozeReminder(3); // ask again in 3 days

@@ -5,7 +5,7 @@
 // - Google Fonts: saved copy first (they never change).
 // - Book lookups and online covers: always live, never saved here.
 
-const CACHE = "boekenhoekje-v3";
+const CACHE = "boekenhoekje-v4";
 const NETWORK_TIMEOUT = 3500; // ms before we give up on a slow network and use the copy
 
 // Everything the app needs to start. Kept up to date by tools/update-sw.py.
