@@ -38,8 +38,9 @@ def sparkle(d, cx, cy, r, fill):
 
 
 def draw_art(background=CREAM):
-    """The stack of books with sparkles, on a square of the given colour (4096 px)."""
-    img = Image.new("RGB", (N, N), background)
+    """The stack of books with sparkles, on a square of the given colour (4096 px).
+    background=None gives a transparent background."""
+    img = Image.new("RGBA", (N, N), (0, 0, 0, 0)) if background is None else Image.new("RGB", (N, N), background)
     d = ImageDraw.Draw(img)
 
     book(d, 252, 650, 772, 760, BEIGE)   # bottom
@@ -68,4 +69,6 @@ if __name__ == "__main__":
         ("apple-touch-icon.png", 180),
     ]:
         img.resize((size, size), Image.LANCZOS).save(out / name, optimize=True)
+    # transparent version for the in-app start-up screen (works on light and dark)
+    draw_art(None).resize((600, 600), Image.LANCZOS).save(out / "splash-art.png", optimize=True)
     print("Icons saved in", out)

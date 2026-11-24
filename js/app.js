@@ -97,4 +97,4 @@ if ("serviceWorker" in navigator && isSecureContext) {
   navigator.serviceWorker.register("sw.js").catch((err) => console.warn("Offline copy not available", err));
 }
 window.addEventListener("hashchange", show);
-show();
+show().then(() => window.hideSplash?.()); // first screen is ready: fade the start-up screen out

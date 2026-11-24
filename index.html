@@ -47,11 +47,59 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@500;600&display=swap">
 
+  <!-- In-app start-up screen: same layout as the iPhone start-up images
+       (tools/make-splash.py), so the two blend into each other. Styled here,
+       inline, so it shows before anything else has loaded. -->
+  <style>
+    #splash {
+      position: fixed; inset: 0; z-index: 100;
+      background: #F5EFE6; color: #8B6B4E;
+      transition: opacity 450ms ease, visibility 450ms;
+    }
+    #splash img {
+      position: absolute; left: 27vw; top: calc(40vh - 23vw);
+      width: 46vw; height: 46vw;
+      transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #splash div {
+      position: absolute; left: 0; right: 0; top: calc(40vh + 24.2vw);
+      text-align: center; font-family: Georgia, serif; font-size: 7.5vw; line-height: 1;
+    }
+    #splash.hide { opacity: 0; visibility: hidden; }
+    #splash.hide img { transform: translateY(-2vh) scale(1.04); }
+    @media (prefers-color-scheme: dark) { #splash { background: #2A1F18; color: #CDAE90; } }
+    @media (prefers-reduced-motion: reduce) { #splash, #splash img { transition: none; } }
+  </style>
+
   <link rel="stylesheet" href="css/theme.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
+  <div id="splash" aria-hidden="true">
+    <img src="icons/splash-art.png" alt="">
+    <div>Boekenhoekje</div>
+  </div>
+  <script>
+    // Only when opened from the home screen, and only on a fresh start
+    // (not when switching back to the app). The app calls hideSplash() once it's ready.
+    (function () {
+      var el = document.getElementById("splash");
+      var standalone = navigator.standalone || matchMedia("(display-mode: standalone)").matches;
+      var seen = false;
+      try { seen = sessionStorage.getItem("splashShown") === "1"; sessionStorage.setItem("splashShown", "1"); } catch (e) {}
+      if (!standalone || seen) { el.remove(); window.hideSplash = function () {}; return; }
+      var shownAt = Date.now();
+      window.hideSplash = function () {
+        // stay at least a moment, so it feels calm instead of flashing
+        setTimeout(function () {
+          el.classList.add("hide");
+          setTimeout(function () { el.remove(); }, 600);
+        }, Math.max(0, 900 - (Date.now() - shownAt)));
+      };
+      setTimeout(window.hideSplash, 6000); // safety net, in case something goes wrong
+    })();
+  </script>
   <main id="app" class="app-main"></main>
   <div class="tabbar-wrap"></div>
 
